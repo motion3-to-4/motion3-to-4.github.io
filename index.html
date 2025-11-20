@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Title</title>
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma-carousel@4.0.3/dist/css/bulma-carousel.min.css">
+  <style>
+    body {
+      font-family: 'Noto Sans', sans-serif;
+    }
+    .publication-title {
+      margin-top: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .publication-links {
+      margin-bottom: 2rem;
+    }
+    .section {
+      padding: 3rem 1.5rem;
+    }
+    .publication-video {
+        position: relative;
+        padding-bottom: 56.25%;
+        height: 0;
+        overflow: hidden;
+    }
+    .publication-video iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+    .footer {
+        padding: 2rem 1.5rem 3rem;
+    }
+    .video-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .video-row {
+        width: 100%;
+    }
+    .video-row video {
+        width: 100%;
+        height: auto;
+    }
+    .carousel {
+        overflow: hidden !important;
+    }
+    .carousel .carousel-container {
+        overflow: hidden !important;
+    }
+    .hero-body {
+        overflow: hidden !important;
+    }
+    .hero-body .container {
+        overflow: hidden !important;
+    }
+
+    #wild-results-carousel .carousel-navigation-previous,
+    #internet-carousel .carousel-navigation-previous,
+    #animation-carousel .carousel-navigation-previous {
+        order: 2;
+    }
+    #wild-results-carousel .carousel-navigation-next,
+    #internet-carousel .carousel-navigation-next,
+    #animation-carousel .carousel-navigation-next {
+        order: 1;
+    }
+    #wild-results-carousel .carousel-navigation,
+    #internet-carousel .carousel-navigation,
+    #animation-carousel .carousel-navigation {
+        display: flex;
+        flex-direction: row-reverse;
+    }
+    .video-single-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        min-height: 200px;
+    }
+    .video-single-row video {
+        width: 100%;
+        max-width: 80%;
+        height: auto;
+        display: block;
+    }
+
+    .results-carousel .item {
+        width: 100% !important;
+        display: block !important;
+    }
+
+    #animation-carousel .item .columns {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        gap: 0 !important;
+    }
+    #animation-carousel .item .column {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+    }
+    #animation-carousel .item img,
+    #animation-carousel .item video {
+        display: block;
+        width: auto;
+        height: 512px;
+        object-fit: contain;
+    }
+    #animation-carousel .item .asset-caption,
+    #animation-carousel .item .prompt-caption {
+        margin-top: 0.5em;
+        text-align: center;
+        width: 100%;
+    }
+
+    
+  </style>
+</head>
+<body>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column has-text-centered">
+        <h1 class="title is-1 publication-title">Motion 3-to-4</h1>
+        <div class="column has-text-centered">
+          <div class="publication-links">
+            <!-- Code link placeholder -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+<!-- <section class="hero is-light is-small">
+<div class="hero-body">
+  <div class="container">
+    <div class="columns is-centered has-text-centered">
+      <div class="column">
+        <video poster="" id="video-1" autoplay controls muted loop playsinline width="100%">
+          <source src="./static/videos/teaser.mp4"
+                  type="video/mp4">
+        </video>
+      </div>
+    </div>
+  </div>
+</div>
+</section> -->
+
+<section class="section">
+<div class="container is-max-desktop">
+  <!-- Abstract. -->
+  <div class="columns is-centered has-text-centered">
+    <div class="column is-four-fifths">
+      <h2 class="title is-3">Abstract</h2>
+      <div class="content has-text-justified">
+        <p>
+          We present Motion 3-to-4, a feed-forward framework for synthesising high-quality 4D dynamic objects from a single monocular video and an optional 3D reference mesh. While recent advances have significantly improved 2D, video, and 3D content generation, 4D synthesis remains difficult due to limited training data and the inherent ambiguity of recovering geometry and motion from a monocular viewpoint.
+          Motion 3-to-4 addresses these challenges by decomposing 4D synthesis into static 3D shape generation and motion reconstruction. Using a canonical reference mesh, our model learns a compact motion latent representation and predicts per-frame vertex trajectories to recover complete, temporally coherent geometry. A scalable frame-wise transformer further enables robustness to varying sequence lengths.
+          Evaluations on both standard benchmarks and a new dataset with accurate ground-truth geometry show that Motion 3-to-4 delivers superior fidelity and spatial consistency compared to prior work.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="columns is-centered has-text-centered">
+    <div class="column is-four-fifths">
+      <h2 class="title is-3">Method</h2>
+      <div>
+        <img src="static/images/motion324.png" class="center">
+      </div>
+      <div class="content has-text-justified">
+        <p>
+          <b>Our framework consists of two main components: 
+          <br>
+          <ol>
+            <li>motion latent learning that encodes the static mesh and video frames into a compact representation;
+            <li>motion decoding that regresses per-frame point locations from queries sampled on the static mesh.</li>
+          </ol>
+        </p>
+      </div>
+      
+    </div>
+  </div>
+  <div class="columns is-centered has-text-centered">
+    <div class="column is-four-fifths">
+      <h2 class="title is-3">Visual Comparison with Other Methods</h2>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="hero is-light is-small">
+<div class="hero-body">
+  <div class="container">
+    <div id="comparison-carousel" class="carousel results-carousel">
+      <!-- Group 1 -->
+      <div class="item">
+        <div class="video-grid">
+          <div class="video-row">
+            <video autoplay controls muted loop playsinline width="100%">
+              <source src="./static/videos/comp_viz/00b9f134359645148c3a.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="video-row">
+            <video autoplay controls muted loop playsinline width="100%">
+              <source src="./static/videos/comp_viz/075da77f55894dec9dcc.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="video-row">
+            <video autoplay controls muted loop playsinline width="100%">
+              <source src="./static/videos/comp_viz/088687e4034a49658f03.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="video-row">
+            <video autoplay controls muted loop playsinline width="100%">
+              <source src="./static/videos/comp_viz/09148d8bdff447ab84b1.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+      </div>
+      <!-- Group 2 -->
+      <div class="item">
+        <div class="video-grid">
+          <div class="video-row">
+            <video autoplay controls muted loop playsinline width="100%">
+              <source src="./static/videos/comp_viz/0a7369afec3e461d8f66.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="video-row">
+            <video autoplay controls muted loop playsinline width="100%">
+              <source src="./static/videos/comp_viz/0b871ded46ec48f295da.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="video-row">
+            <video autoplay controls muted loop playsinline width="100%">
+              <source src="./static/videos/comp_viz/0f142eaa4ab94740ba9e.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="video-row">
+            <video autoplay controls muted loop playsinline width="100%">
+              <source src="./static/videos/comp_viz/1697d86e7a2f417185a7.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+      </div>
+      <!-- Group 3 -->
+      <div class="item">
+        <div class="video-grid">
+          <div class="video-row">
+            <video autoplay controls muted loop playsinline width="100%">
+              <source src="./static/videos/comp_viz/1f098a7cc2744736ba13.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="video-row">
+            <video autoplay controls muted loop playsinline width="100%">
+              <source src="./static/videos/comp_viz/34fe9318855d4f9ea80d.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="video-row">
+            <video autoplay controls muted loop playsinline width="100%">
+              <source src="./static/videos/comp_viz/35689c8c52d54f9bbf4a.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="video-row">
+            <video autoplay controls muted loop playsinline width="100%">
+              <source src="./static/videos/comp_viz/66b977817f6a495f889c.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+      </div>
+      <!-- Group 4 -->
+      <div class="item">
+        <div class="video-grid">
+          <div class="video-row">
+            <video autoplay controls muted loop playsinline width="100%">
+              <source src="./static/videos/comp_viz/9cda2dc67b5c4a9a88fe.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="video-row">
+            <video autoplay controls muted loop playsinline width="100%">
+              <source src="./static/videos/comp_viz/b3139fdc5465449589b0.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="video-row">
+            <video autoplay controls muted loop playsinline width="100%">
+              <source src="./static/videos/comp_viz/f819d72955004cc3bfab.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="video-row">
+            <video autoplay controls muted loop playsinline width="100%">
+              <source src="./static/videos/comp_viz/fa9f51beb7634443be3f.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+<section class="section">
+<div class="container is-max-desktop">
+  <div class="columns is-centered has-text-centered">
+    <div class="column is-four-fifths">
+      <h2 class="title is-3">From Synthesis video</h2>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="hero is-light is-small">
+<div class="hero-body">
+  <div class="container">
+    <div id="wild-results-carousel" class="carousel results-carousel">
+      <div class="item">
+        <div class="video-single-row">
+          <video autoplay controls muted loop playsinline>
+            <source src="./static/videos/syn/box.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <div class="item">
+        <div class="video-single-row">
+          <video autoplay controls muted loop playsinline>
+            <source src="./static/videos/syn/dance_bear.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <div class="item">
+        <div class="video-single-row">
+          <video autoplay controls muted loop playsinline>
+            <source src="./static/videos/syn/bear.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <div class="item">
+        <div class="video-single-row">
+          <video autoplay controls muted loop playsinline>
+            <source src="./static/videos/syn/bear_syn.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <div class="item">
+        <div class="video-single-row">
+          <video autoplay controls muted loop playsinline>
+            <source src="./static/videos/syn/fly.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <div class="item">
+        <div class="video-single-row">
+          <video autoplay controls muted loop playsinline>
+            <source src="./static/videos/syn/surf.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="section">
+<div class="container is-max-desktop">
+
+  <div class="columns is-centered has-text-centered">
+    <div class="column is-four-fifths">
+      <h2 class="title is-3">From Internet video</h2>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="hero is-light is-small">
+<div class="hero-body">
+  <div class="container">
+    <div id="internet-carousel" class="carousel results-carousel">
+      <!-- Internet videos -->
+      <div class="item">
+        <div class="video-single-row">
+          <video autoplay controls muted loop playsinline>
+            <source src="./static/videos/internet/star1.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <div class="item">
+        <div class="video-single-row">
+          <video autoplay controls muted loop playsinline>
+            <source src="./static/videos/internet/star2.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <div class="item">
+        <div class="video-single-row">
+          <video autoplay controls muted loop playsinline>
+            <source src="./static/videos/internet/bear_inter.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <div class="item">
+        <div class="video-single-row">
+          <video autoplay controls muted loop playsinline>
+            <source src="./static/videos/internet/star3.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <div class="item">
+        <div class="video-single-row">
+          <video autoplay controls muted loop playsinline>
+            <source src="./static/videos/internet/star4.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <div class="item">
+        <div class="video-single-row">
+          <video autoplay controls muted loop playsinline>
+            <source src="./static/videos/internet/horse.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Animating 3D Models via VideoGen</h2>
+      </div>
+    </div>
+    <div id="animation-carousel" class="carousel results-carousel">
+      <!-- Carousel item 1 -->
+      <div class="item">
+        <div class="columns is-vcentered is-centered" style="margin-bottom: 1em;">
+          <div class="column is-6 has-text-centered">
+            <img src="./static/videos/animation/wolf.png" alt="3D asset 1">
+            <div class="asset-caption" style="font-size: 1em; font-style: italic;">
+              3D Asset
+            </div>
+          </div>
+          <div class="column is-6 has-text-centered">
+            <video autoplay controls muted loop playsinline>
+              <source src="./static/videos/animation/wolf.mp4" type="video/mp4">
+            </video>
+            <div class="prompt-caption" style="font-size:1em; font-style:italic; color:#666;">
+              Prompt: Camera fixed, let it move.
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Carousel item 2 -->
+      <div class="item">
+        <div class="columns is-vcentered is-centered" style="margin-bottom: 1em;">
+          <div class="column is-6 has-text-centered">
+            <img src="./static/videos/animation/chill.png" alt="3D asset 2">
+            <div class="asset-caption" style="font-size: 1em; font-style: italic;">
+              3D Asset
+            </div>
+          </div>
+          <div class="column is-6 has-text-centered">
+            <video autoplay controls muted loop playsinline>
+              <source src="./static/videos/animation/chill.mp4" type="video/mp4">
+            </video>
+            <div class="prompt-caption" style="font-size:1em; font-style:italic; color:#666;">
+              Prompt: Camera fixed, let it dance.
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Carousel item 3 -->
+      <div class="item">
+        <div class="columns is-vcentered is-centered" style="margin-bottom: 1em;">
+          <div class="column is-6 has-text-centered">
+            <img src="./static/videos/animation/dinosaur.png" alt="3D asset 3">
+            <div class="asset-caption" style="font-size: 1em; font-style: italic;">
+              3D Asset
+            </div>
+          </div>
+          <div class="column is-6 has-text-centered">
+            <video autoplay controls muted loop playsinline>
+              <source src="./static/videos/animation/dinosaur.mp4" type="video/mp4">
+            </video>
+            <div class="prompt-caption" style="font-size:1em; font-style:italic; color:#666;">
+              Prompt: Camera fixed, let it roar.
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Carousel item 4 -->
+      <div class="item">
+        <div class="columns is-vcentered is-centered" style="margin-bottom: 1em;">
+          <div class="column is-6 has-text-centered">
+            <img src="./static/videos/animation/fox.png" alt="3D asset 4">
+            <div class="asset-caption" style="font-size: 1em; font-style: italic;">
+              3D Asset
+            </div>
+          </div>
+          <div class="column is-6 has-text-centered">
+            <video autoplay controls muted loop playsinline>
+              <source src="./static/videos/animation/fox.mp4" type="video/mp4">
+            </video>
+            <div class="prompt-caption" style="font-size:1em; font-style:italic; color:#666;">
+              Prompt: Camera fixed, let it wave.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<section class="section">
+<div class="container is-max-desktop">
+
+<section class="section">
+<div class="container is-max-desktop">
+  <br>
+
+  <div class="columns is-centered has-text-centered">
+    <div class="column is-four-fifths">
+      <h2 class="title is-3">Motion Retarget</h2>
+    </div>
+  </div>
+  <br>
+  
+  <div class="columns is-centered has-text-centered">
+    <div class="column">
+      <div class="content">
+        <video id="retarget-video-1" autoplay="" controls="" muted="" loop="" playsinline="" width="80%" height="100%">
+          <source src="./static/videos/retarget/roar.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+  </div>
+  <br>
+  <div class="columns is-centered has-text-centered">
+    <div class="column">
+      <div class="content">
+        <video id="retarget-video-2" autoplay="" controls="" muted="" loop="" playsinline="" width="80%" height="100%">
+          <source src="./static/videos/retarget/walk.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+  </div>
+
+</div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content has-text-centered">
+          <p>
+            This project page is inspired by <a href="https://nerfies.github.io">Nerfies</a> and <a href="https://gvfdiffusion.github.io/">GVFDiffusion</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bulma-carousel@4.0.3/dist/js/bulma-carousel.min.js"></script>
+<script>
+  bulmaCarousel.attach('#comparison-carousel', {
+    slidesToScroll: 1,
+    slidesToShow: 1,
+    infinite: true,
+    autoplay: false,
+    navigation: true,
+    navigationKeys: true,
+    navigationSwipe: true
+  });
+  
+  bulmaCarousel.attach('#wild-results-carousel', {
+    slidesToScroll: 1,
+    slidesToShow: 1,
+    infinite: true,
+    autoplay: false,
+    navigation: true,
+    navigationKeys: true,
+    navigationSwipe: true
+  });
+  
+  bulmaCarousel.attach('#internet-carousel', {
+    slidesToScroll: 1,
+    slidesToShow: 1,
+    infinite: true,
+    autoplay: false,
+    navigation: true,
+    navigationKeys: true,
+    navigationSwipe: true
+  });
+  
+  bulmaCarousel.attach('#animation-carousel', {
+    slidesToScroll: 1,
+    slidesToShow: 1,
+    infinite: true,
+    autoplay: false,
+    navigation: true,
+    navigationKeys: true,
+    navigationSwipe: true
+  });
+</script>
+
+</body>
+</html>
