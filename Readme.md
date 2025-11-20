@@ -1,4 +1,4 @@
-# Titile 
+# Motion 3-to-4
 The project page of [Motion 3-to-4](https://motion3-to-4.github.io/).
 
 <p align="center">
