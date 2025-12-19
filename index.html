@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Motion 3-to-4: 3D Motion Reconstruction for 4D Synthesis.">
+  <link rel="icon" type="image/png" href="./static/icons/icon_rgba_512.png">
+  <title>Motion 3-to-4</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Castoro:ital@0;1&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+  <style>
+    :root {
+      /* Color Palette - Light Academic Theme (Original) */
+      --bg-color: #ffffff;
+      --surface-color: #f8f9fa; /* Light grey for cards */
+      --surface-hover: #e9ecef;
+      --text-main: #2d3748;
+      --text-muted: #718096;
+      --accent-color: #3182ce; /* Academic Blue */
+      --accent-glow: rgba(49, 130, 206, 0.2);
+      
+      /* Updated for softer look */
+      --border-color: rgba(0,0,0,0.05); /* Much lighter border */
+      --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-strong: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      
+      /* Spacing & Layout */
+      --max-width: 1000px;
+      --radius: 16px; /* Slightly more rounded */
+    }
+    /* Global Reset & Base */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      /* Subtle Paper Texture (Original kept as requested) */
+      background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+
+    a { color: var(--accent-color); text-decoration: none; transition: 0.2s; }
+    a:hover { color: #2c5282; text-decoration: underline; }
+
+    /* Layout Utilities */
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    .section {
+      /* OPTIMIZATION 1: Reduced spacing from 4rem to 1rem */
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .section:last-child { border-bottom: none; }
+
+    /* Typography */
+    h1, h2, h3 { font-weight: 800; letter-spacing: -0.02em; color: #1a202c; }
+    h1 { font-size: clamp(2.5rem, 5vw, 3.5rem); text-align: center; margin-bottom: 0.5rem; }
+    h2 { font-size: 2rem; margin-bottom: 1.5rem; text-align: center; position: relative; }
+    
+    /* Decorative underline for H2 */
+    h2::after {
+      content: ''; display: block; width: 60px; height: 4px; 
+      background: var(--accent-color); margin: 0.5rem auto 0; border-radius: 2px;
+      opacity: 0.8;
+    }
+
+    p { margin-bottom: 1rem; font-size: 1.1rem; color: #4a5568; }
+    
+    /* Authors & Affiliation (NEW) */
+    .authors-list {
+      text-align: center;
+      margin-bottom: 0.5rem;
+      font-size: 1.25rem;
+      color: var(--text-main);
+    }
+    .affiliation {
+      text-align: center;
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+    .author-block {
+      display: inline-block;
+      margin: 0 10px;
+    }
+
+    /* Academic Typography for Abstract */
+    .abstract-text {
+      font-family: 'Castoro', serif;
+      font-size: 1.2rem;
+      text-align: justify;
+      background: #fff;
+      padding: 2.5rem;
+      border-radius: var(--radius);
+      /* OPTIMIZATION 4: Softer shadow, no harsh border */
+      border: none;
+      box-shadow: var(--shadow-soft);
+    }
+
+    /* Hero Section */
+    .hero {
+      padding-top: 3rem;
+      padding-bottom: 2rem;
+      text-align: center;
+    }
+    
+    .publication-links {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 3rem;
+      flex-wrap: wrap;
+    }
+    
+    .link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #2d3748;
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 50px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-sm);
+    }
+    .link-btn:hover {
+      background: #1a202c;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      color: #fff;
+      text-decoration: none;
+    }
+
+    /* Video & Media Containers */
+    .video-container {
+      position: relative;
+      /* OPTIMIZATION 2 & 5: Removed black background to fix retargeting black screen and black bars */
+      background: transparent; 
+      border-radius: var(--radius);
+      overflow: hidden;
+      /* OPTIMIZATION 4: Softer shadow, removed border */
+      box-shadow: var(--shadow-soft);
+      border: none;
+    }
+    
+    .video-container video, .video-container img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .video-container-bg {
+      display: flex;
+      flex-direction: row-reverse; 
+      align-items: center;
+      gap: 15px; 
+
+      background: #ffffff;
+      border: 1px solid rgba(0,0,0,0.08);
+      padding: 12px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .video-container-bg video {
+      flex: 1;
+      width: 0;
+      height: auto;
+      border-radius: 8px;
+      display: block;
+    }
+    .video-container-bg .overlay-asset-container {
+      position: relative; /* 覆盖原来的 absolute */
+      width: 25%;         /* 图片占比 */
+      flex-shrink: 0;     /* 防止挤压 */
+      
+      /* 重置定位 */
+      top: auto; bottom: auto; left: auto; right: auto;
+      padding: 0;
+      z-index: auto;
+      pointer-events: auto; /* 恢复鼠标交互 */
+    }
+
+    /* 3. 图片样式：去毛玻璃，加细框 */
+    .video-container-bg .overlay-asset-container img {
+      width: 100%;
+      height: auto;
+      border-radius: 6px;
+      border: 1px solid rgba(0,0,0,0.1);
+      background: transparent;
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+
+    /* 4. 标签样式：深色字适配白底 */
+    .video-container-bg .overlay-label {
+      color: #555;
+      background: #f1f1f1;
+      font-size: 0.75rem;
+      text-align: center;
+      border-radius: 4px;
+      margin-top: 6px;
+      padding: 3px 6px;
+      font-weight: 600;
+    }
+
+    /* --- New Styles for Overlay Layout --- */
+    .overlay-asset-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 25%; /* 1/4 width */
+      z-index: 1;
+      padding: 12px;
+    }
+    .overlay-asset-container img {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      background: rgba(0,0,0,0.01);
+      backdrop-filter: blur(4px);
+    }
+    .overlay-label {
+      color: white;
+      font-size: 0.75rem;
+      text-align: center;
+      background: rgba(0,0,0,0.01);
+      border-radius: 4px;
+      margin-top: 5px;
+      padding: 2px 4px;
+      font-weight: 500;
+    }
+
+    .hero-video {
+      max-width: 900px;
+      margin: 0 auto;
+      box-shadow: var(--shadow-strong); /* Stronger shadow for main video */
+    }
+
+    /* Method Section */
+    .method-image {
+      max-width: 100%;
+      border-radius: var(--radius);
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-soft);
+      border: none;
+    }
+    .method-list {
+      list-style: none;
+      counter-reset: method-counter;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .method-list li {
+      position: relative;
+      padding-left: 3rem;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+      color: #2d3748;
+    }
+    .method-list li::before {
+      counter-increment: method-counter;
+      content: counter(method-counter);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 2rem;
+      height: 2rem;
+      background: var(--accent-color);
+      color: white;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 2rem;
+      font-weight: bold;
+    }
+
+    /* Comparison Stack (Vertical Layout) */
+    .comparison-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-bottom: 20px;
+      width: 100%;
+      max-width: 850px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Carousel */
+    .carousel-container {
+      position: relative;
+      width: 100%;
+      margin: 2rem 0;
+    }
+    
+    .carousel-track {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 20px;
+      padding: 10px 5px 20px 5px;
+      padding-bottom: 20px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent-color) var(--surface-color);
+    }
+    
+    .carousel-track::-webkit-scrollbar {
+      height: 8px;
+    }
+    .carousel-track::-webkit-scrollbar-track {
+      background: var(--surface-color);
+      border-radius: 4px;
+    }
+    .carousel-track::-webkit-scrollbar-thumb {
+      background: var(--accent-color);
+      border-radius: 4px;
+    }
+
+    .carousel-item {
+      flex: 0 0 100%;
+      scroll-snap-align: center;
+      background: #fff;
+      padding: 30px;
+      border-radius: var(--radius);
+      /* OPTIMIZATION 4: Softer shadow, removed border */
+      border: none;
+      box-shadow: var(--shadow-soft);
+    }
+
+    @media (max-width: 768px) {
+      .split-view { grid-template-columns: 1fr; }
+      h1 { font-size: 2rem; }
+      .abstract-text { padding: 1.5rem; }
+      .comparison-stack { width: 100%; }
+      .carousel-item {
+        padding: 1rem;
+      }
+    }
+    /* 2-Column Layout for Animation Section */
+    .split-view {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: center;
+    }
+    .split-card {
+      background: var(--surface-color);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      text-align: center;
+      border: none;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); /* Subtle inset for depth */
+    }
+    .caption {
+      margin-top: 0.8rem;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+    }
+
+    /* Retarget Section */
+    .retarget-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    /* BibTeX */
+    .bibtex {
+      background: #f1f5f9;
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: #2d3748;
+      overflow-x: auto;
+      border: none;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
+      text-align: left;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 3rem 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--border-color);
+      margin-top: 2rem;
+      background: var(--surface-color);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .split-view { grid-template-columns: 1fr; }
+      h1 { font-size: 2rem; }
+      .abstract-text { padding: 1.5rem; }
+      .comparison-stack { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero Section -->
+  <section class="hero container">
+    <h1>
+      <img src="./static/icons/icon_rgba.png" alt="Project Icon2" style="height: 3em; vertical-align: middle; margin-right: 0.5em;">
+      <span style="font-weight: 800; display: inline-block;">Motion 3-to-4</span>
+      
+      <span style="font-weight: 550;font-size: 0.75em; display: inline-block;">3D Motion Reconstruction for 4D Synthesis</span>
+    </h1>
+    <div class="authors-list">
+        <div class="author-block"><a href="https://hyuanChen.github.io/">Hongyuan Chen</a><sup>1</sup></div>
+        <div class="author-block"><a href="https://rover-xingyu.github.io/">Xingyu Chen</a><sup>1</sup></div>
+        <div class="author-block"><a href="https://zexiangxu.github.io/">Zexiang Xu</a><sup>2</sup></div>
+        <div class="author-block"><a href="https://apchenstu.github.io/">Anpei Chen</a><sup>1</sup></div>
+    </div>
+    <div class="affiliation">
+        <span><sup>1</sup>Westlake University</span>
+        <span style="margin-left: 15px;"><sup>2</sup>Hillbot</span>
+    </div>
+
+    <p style="font-size: 1.25rem; color: #4a5568; margin-bottom: 2rem; max-width: 800px; margin-left: auto; margin-right: auto;">
+      Synthesising high-quality 4D dynamic objects from single monocular video
+    </p>
+
+    <!-- Links -->
+    <div class="publication-links">
+      <a href="#" class="link-btn">
+        <i class="fas fa-file-pdf"></i> Paper
+      </a>
+      <a href="#" class="link-btn">
+        <i class="ai ai-arxiv"></i> arXiv
+      </a>
+      <a href="#" class="link-btn">
+        <i class="fab fa-github"></i> Code
+      </a>
+      <a href="#bibtex" class="link-btn">
+        <i class="fas fa-quote-right"></i> Cite
+      </a>
+    </div>
+
+    <!-- Teaser Video -->
+    <div class="video-container hero-video">
+      <video autoplay controls muted loop playsinline poster="">
+        <source src="./static/videos/teaser.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  </section>
+
+  <!-- Abstract Section -->
+  <section class="section container">
+    <h2>Abstract</h2>
+    <div class="abstract-text">
+      <p>
+        We present <b>Motion 3-to-4</b>, a feed-forward framework for synthesising high-quality 4D dynamic objects from a single monocular video and an optional 3D reference mesh. While recent advances have significantly improved 2D, video, and 3D content generation, 4D synthesis remains difficult due to limited training data and the inherent ambiguity of recovering geometry and motion from a monocular viewpoint.
+      </p>
+      <p style="margin-bottom: 0;">
+        Motion 3-to-4 addresses these challenges by decomposing 4D synthesis into static 3D shape generation and motion reconstruction. Using a canonical reference mesh, our model learns a compact motion latent representation and predicts per-frame vertex trajectories to recover complete, temporally coherent geometry. A scalable frame-wise transformer further enables robustness to varying sequence lengths. Evaluations on both standard benchmarks and a new dataset with accurate ground-truth geometry show that Motion 3-to-4 delivers superior fidelity and spatial consistency compared to prior work.
+      </p>
+    </div>
+  </section>
+
+  <!-- Method Section -->
+  <section class="section container">
+    <h2>Methodology</h2>
+    <div style="text-align: center;">
+      <img src="static/images/motion324.png" alt="Method Diagram" class="method-image">
+    </div>
+    <div class="abstract-text" style="background: transparent; box-shadow: none; border: none; padding: 0;">
+      <p>Our framework consists of two main components:</p>
+      <ul class="method-list">
+        <li><b>Motion Latent Learning:</b> Encodes the static mesh and video frames into a compact representation.</li>
+        <li><b>Motion Decoding:</b> Regresses per-frame point locations from queries sampled on the static mesh to generate temporally coherent 4D output.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Visual Comparison (Vertical Stack Layout) -->
+  <section class="section container">
+    <h2>Visual Comparison with SOTA on Motion-80 Dataset</h2>
+    <p style="text-align: center; margin-bottom: 2rem;">Comparing Motion 3-to-4 with baseline methods</p>
+    
+    <div class="carousel-container">
+      <div class="carousel-track">
+        
+        <!-- Group 1 -->
+        <div class="carousel-item">
+          <div class="comparison-stack">
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/comp_viz/00b9f134359645148c3a.mp4" type="video/mp4"></video></div>
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/comp_viz/075da77f55894dec9dcc.mp4" type="video/mp4"></video></div>
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/comp_viz/088687e4034a49658f03.mp4" type="video/mp4"></video></div>
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/comp_viz/09148d8bdff447ab84b1.mp4" type="video/mp4"></video></div>
+          </div>
+          <div class="caption" style="text-align: center; font-weight: bold; margin-top: 10px;">Part A Results</div>
+        </div>
+
+        <!-- Group 2 -->
+        <div class="carousel-item">
+          <div class="comparison-stack">
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/comp_viz/0a7369afec3e461d8f66.mp4" type="video/mp4"></video></div>
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/comp_viz/0b871ded46ec48f295da.mp4" type="video/mp4"></video></div>
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/comp_viz/0f142eaa4ab94740ba9e.mp4" type="video/mp4"></video></div>
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/comp_viz/1697d86e7a2f417185a7.mp4" type="video/mp4"></video></div>
+          </div>
+          <div class="caption" style="text-align: center; font-weight: bold; margin-top: 10px;">Part B Results</div>
+        </div>
+        
+        <!-- Group 3 -->
+        <div class="carousel-item">
+          <div class="comparison-stack">
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/comp_viz/1f098a7cc2744736ba13.mp4" type="video/mp4"></video></div>
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/comp_viz/34fe9318855d4f9ea80d.mp4" type="video/mp4"></video></div>
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/comp_viz/35689c8c52d54f9bbf4a.mp4" type="video/mp4"></video></div>
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/comp_viz/66b977817f6a495f889c.mp4" type="video/mp4"></video></div>
+          </div>
+          <div class="caption" style="text-align: center; font-weight: bold; margin-top: 10px;">Part C Results</div>
+        </div>
+
+        <!-- Group 4 -->
+        <div class="carousel-item">
+          <div class="comparison-stack">
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/comp_viz/9cda2dc67b5c4a9a88fe.mp4" type="video/mp4"></video></div>
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/comp_viz/b3139fdc5465449589b0.mp4" type="video/mp4"></video></div>
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/comp_viz/f819d72955004cc3bfab.mp4" type="video/mp4"></video></div>
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/comp_viz/fa9f51beb7634443be3f.mp4" type="video/mp4"></video></div>
+          </div>
+          <div class="caption" style="text-align: center; font-weight: bold; margin-top: 10px;">Part D Results</div>
+        </div>
+      </div>
+      <p class="caption" style="text-align: center; margin-top: 10px;">← Swipe to see more results →</p>
+    </div>
+  </section>
+
+  <!-- Synthesis Videos -->
+  <section class="section container">
+    <h2>Synthesis Results</h2>
+    <div class="carousel-container">
+      <div class="carousel-track">
+        <div class="carousel-item" style="flex: 0 0 50%; max-width: 500px;">
+           <div class="video-container">
+             <video autoplay controls muted loop playsinline><source src="./static/videos/syn/box.mp4" type="video/mp4"></video>
+           </div>
+           <div class="caption center">Boxing</div>
+        </div>
+        <div class="carousel-item" style="flex: 0 0 50%; max-width: 500px;">
+           <div class="video-container">
+             <video autoplay controls muted loop playsinline><source src="./static/videos/syn/dance_bear.mp4" type="video/mp4"></video>
+           </div>
+           <div class="caption center">Dancing Bear</div>
+        </div>
+        <div class="carousel-item" style="flex: 0 0 50%; max-width: 500px;">
+           <div class="video-container">
+             <video autoplay controls muted loop playsinline><source src="./static/videos/syn/bear.mp4" type="video/mp4"></video>
+           </div>
+           <div class="caption center">Cute toy</div>
+        </div>
+        <div class="carousel-item" style="flex: 0 0 50%; max-width: 500px;">
+          <div class="video-container">
+            <video autoplay controls muted loop playsinline><source src="./static/videos/syn/bear_syn.mp4" type="video/mp4"></video>
+          </div>
+          <div class="caption center">Walking Bear</div>
+        </div>
+        <div class="carousel-item" style="flex: 0 0 50%; max-width: 500px;">
+           <div class="video-container">
+             <video autoplay controls muted loop playsinline><source src="./static/videos/syn/fly.mp4" type="video/mp4"></video>
+           </div>
+           <div class="caption center">Flying</div>
+        </div>
+        <div class="carousel-item" style="flex: 0 0 50%; max-width: 500px;">
+           <div class="video-container">
+             <video autoplay controls muted loop playsinline><source src="./static/videos/syn/surf.mp4" type="video/mp4"></video>
+           </div>
+           <div class="caption center">Surfing</div>
+        </div>
+      </div>
+      <p class="caption" style="text-align: center; margin-top: 10px;">← Swipe to see more results →</p>
+    </div>
+  </section>
+
+  <!-- Real World Video -->
+  <section class="section container">
+    <h2>Real-World Video Reconstruction</h2>
+    <div class="carousel-container">
+      <div class="carousel-track">
+        <div class="carousel-item" style="flex: 0 0 40%; max-width: 400px;">
+          <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/internet/horse.mp4" type="video/mp4"></video></div>
+          <div class="caption center">Horse</div>
+        </div>
+        <div class="carousel-item" style="flex: 0 0 40%; max-width: 400px;">
+          <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/internet/star1.mp4" type="video/mp4"></video></div>
+          <div class="caption center">Starfish 1</div>
+        </div>
+        <div class="carousel-item" style="flex: 0 0 40%; max-width: 400px;">
+          <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/internet/star2.mp4" type="video/mp4"></video></div>
+          <div class="caption center">Starfish 2</div>
+        </div>
+        <div class="carousel-item" style="flex: 0 0 40%; max-width: 400px;">
+          <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/internet/bear_inter.mp4" type="video/mp4"></video></div>
+          <div class="caption center">Bear</div>
+        </div>
+        <div class="carousel-item" style="flex: 0 0 40%; max-width: 400px;">
+          <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/internet/star3.mp4" type="video/mp4"></video></div>
+          <div class="caption center">Starfish 3</div>
+        </div>
+        <div class="carousel-item" style="flex: 0 0 40%; max-width: 400px;">
+          <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/internet/star4.mp4" type="video/mp4"></video></div>
+          <div class="caption center">Starfish 4</div>
+        </div>
+      </div>
+      <p class="caption" style="text-align: center; margin-top: 10px;">← Swipe to see more results →</p>
+    </div>
+  </section>
+
+  <!-- 3D Animation via VideoGen (MODIFIED LAYOUT) -->
+  <section class="section container">
+    <h2>3D Animation via VideoGen</h2>
+    <p style="text-align:center; margin-bottom: 2rem; color: var(--text-muted);">Driving static 3D assets with text prompts and generated videos</p>
+    
+    <div class="carousel-container">
+      <div class="carousel-track">
+        
+        <!-- Wolf -->
+        <div class="carousel-item" style="flex: 0 0 60%; max-width: 600px;">
+          <div class="video-container-bg">
+            <!-- Main Video -->
+            <video autoplay controls muted loop playsinline><source src="./static/videos/animation/wolf.mp4" type="video/mp4"></video>
+            
+            <!-- Overlay Image (Top Left, 1/4 width) -->
+            <div class="overlay-asset-container">
+              <img src="./static/videos/animation/wolf.png" alt="Wolf Asset">
+              <div class="overlay-label">Input Asset</div>
+            </div>
+          </div>
+          <div class="caption">Prompt: "Camera fixed, let it move."</div>
+        </div>
+
+        <!-- Chill -->
+        <div class="carousel-item" style="flex: 0 0 60%; max-width: 600px;">
+          <div class="video-container-bg">
+            <video autoplay controls muted loop playsinline><source src="./static/videos/animation/chill.mp4" type="video/mp4"></video>
+            <div class="overlay-asset-container">
+              <img src="./static/videos/animation/chill.png" alt="Chill Asset">
+              <div class="overlay-label">Input Asset</div>
+            </div>
+          </div>
+          <div class="caption">Prompt: "Camera fixed, let it dance."</div>
+        </div>
+
+        <!-- Dinosaur -->
+        <div class="carousel-item" style="flex: 0 0 60%; max-width: 600px;">
+          <div class="video-container-bg">
+            <video autoplay controls muted loop playsinline><source src="./static/videos/animation/dinosaur.mp4" type="video/mp4"></video>
+            <div class="overlay-asset-container">
+              <img src="./static/videos/animation/dinosaur.png" alt="Dino Asset">
+              <div class="overlay-label">Input Asset</div>
+            </div>
+          </div>
+          <div class="caption">Prompt: "Camera fixed, let it roar."</div>
+        </div>
+
+         <!-- Fox -->
+         <div class="carousel-item" style="flex: 0 0 60%; max-width: 600px;">
+          <div class="video-container-bg">
+            <video autoplay controls muted loop playsinline><source src="./static/videos/animation/fox.mp4" type="video/mp4"></video>
+            <div class="overlay-asset-container">
+              <img src="./static/videos/animation/fox.png" alt="Fox Asset">
+              <div class="overlay-label">Input Asset</div>
+            </div>
+          </div>
+          <div class="caption">Prompt: "Camera fixed, let it wave."</div>
+        </div>
+
+      </div>
+      <p class="caption" style="text-align: center; margin-top: 10px;">← Swipe to see more results →</p>
+    </div>
+  </section>
+
+  <!-- Motion Retargeting -->
+  <section class="section container">
+    <h2>Motion Retargeting</h2>
+    <div class="retarget-grid">
+      <div class="video-container">
+        <video id="retarget-video-1" autoplay controls muted loop playsinline>
+          <source src="./static/videos/retarget/roar.mp4" type="video/mp4">
+        </video>
+        <div class="caption" style="text-align: center; padding: 10px;">Roar Motion Transfer</div>
+      </div>
+      <div class="video-container">
+        <video id="retarget-video-2" autoplay controls muted loop playsinline>
+          <source src="./static/videos/retarget/walk.mp4" type="video/mp4">
+        </video>
+        <div class="caption" style="text-align: center; padding: 10px;">Walk Motion Transfer</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Citation -->
+  <!-- <section class="section container" id="bibtex">
+    <h2>Citation</h2>
+    <pre class="bibtex">
+    @article{motion3to4,
+      title={Motion 3-to-4: Feed-forward Framework for Synthesising High-quality 4D Dynamic Objects},
+      author={Author List Placeholder},
+      journal={Conference Name or Journal},
+      year={202X}
+    }</pre>
+  </section> -->
+
+  <footer>
+    <div class="container">
+      <p>
+        This project page is inspired by <a href="https://nerfies.github.io">Nerfies</a> and <a href="https://gvfdiffusion.github.io/">GVFDiffusion</a>.
+      </p>
+    </div>
+  </footer>
+
+</body>
+</html>
