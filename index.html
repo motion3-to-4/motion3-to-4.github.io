@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Motion 3-to-4: 3D Motion Reconstruction for 4D Synthesis.">
-  <link rel="icon" type="image/png" href="./static/icons/icon_rgba_512.png">
+  <link rel="icon" type="image/png" href="./static/icons/round_icon.png">
   <title>Motion 3-to-4</title>
 
   <!-- Google Fonts -->
@@ -47,6 +47,8 @@
       /* Subtle Paper Texture (Original kept as requested) */
       background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
       background-size: 20px 20px;
+      /* background-image: none;
+      background-size: initial; */
     }
 
     a { color: var(--accent-color); text-decoration: none; transition: 0.2s; }
@@ -156,12 +158,19 @@
       /* OPTIMIZATION 4: Softer shadow, removed border */
       box-shadow: var(--shadow-soft);
       border: none;
+      /* Prevent video from capturing mouse events when dragging */
+      pointer-events: none; 
     }
-    
+    /* Re-enable pointer events for controls on the video itself if needed, 
+       but for dragging container, we usually want the click to go through to container logic.
+       However, 'controls' attribute needs pointer-events. 
+       Let's keep pointer-events auto for the video element specifically so controls work,
+       but we will handle drag vs click in JS. */
     .video-container video, .video-container img {
       width: 100%;
       height: auto;
       display: block;
+      pointer-events: auto;
     }
 
     .video-container-bg {
@@ -302,6 +311,11 @@
       max-width: 850px;
       margin-left: auto;
       margin-right: auto;
+      /* Ensure videos inside don't block drag */
+      pointer-events: none;
+    }
+    .comparison-stack .video-container {
+      pointer-events: auto;
     }
 
     /* Carousel */
@@ -309,19 +323,36 @@
       position: relative;
       width: 100%;
       margin: 2rem 0;
+      /* Ensure buttons can be positioned relative to this */
     }
     
     .carousel-track {
       display: flex;
       overflow-x: auto;
-      scroll-snap-type: x mandatory;
+      scroll-snap-type: x mandatory; /* Default snap */
       gap: 20px;
       padding: 10px 5px 20px 5px;
       padding-bottom: 20px;
       scrollbar-width: thin;
       scrollbar-color: var(--accent-color) var(--surface-color);
+      
+      /* Drag cursor styles */
+      cursor: grab;
+      /* Remove tap highlight on mobile */
+      -webkit-tap-highlight-color: transparent;
     }
     
+    /* When dragging, change cursor and disable snap for smooth movement */
+    .carousel-track.active {
+      cursor: grabbing;
+      cursor: -webkit-grabbing;
+      scroll-snap-type: none; /* Disable snap while dragging */
+      user-select: none; /* Prevent text selection */
+    }
+    .carousel-track.active video {
+      pointer-events: none; /* Prevent video controls interaction while dragging */
+    }
+
     .carousel-track::-webkit-scrollbar {
       height: 8px;
     }
@@ -340,10 +371,62 @@
       background: #fff;
       padding: 30px;
       border-radius: var(--radius);
-      /* OPTIMIZATION 4: Softer shadow, removed border */
       border: none;
       box-shadow: var(--shadow-soft);
+      /* Prevent default drag behavior on images/text inside */
+      user-select: none;
     }
+
+    /* Navigation Buttons */
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      font-size: 1.2rem;
+      transition: all 0.2s ease;
+      opacity: 0; /* Hidden by default, shown on hover/JS */
+      pointer-events: none; /* Prevent blocking if invisible */
+    }
+    
+    /* Show buttons when hovering the container */
+    .carousel-container:hover .carousel-btn {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    /* Always show on touch devices if supported, but usually hover is fine for desktop */
+    @media (hover: none) {
+      .carousel-btn {
+        opacity: 0.8; 
+        pointer-events: auto;
+        background: rgba(255, 255, 255, 0.95);
+      }
+    }
+
+    .carousel-btn:hover {
+      background: var(--accent-color);
+      color: white;
+      transform: translateY(-50%) scale(1.1);
+    }
+    .carousel-btn:active {
+      transform: translateY(-50%) scale(0.95);
+    }
+
+    .carousel-btn.left { left: 10px; }
+    .carousel-btn.right { right: 10px; }
+
 
     @media (max-width: 768px) {
       .split-view { grid-template-columns: 1fr; }
@@ -353,7 +436,12 @@
       .carousel-item {
         padding: 1rem;
       }
+      /* Hide buttons on small mobile screens to let native swipe take over */
+      .carousel-btn {
+        display: none;
+      }
     }
+    
     /* 2-Column Layout for Animation Section */
     .split-view {
       display: grid;
@@ -375,6 +463,7 @@
       color: var(--text-muted);
       font-family: 'Inter', sans-serif;
       font-weight: 500;
+      user-select: text; /* Allow selecting caption text */
     }
 
     /* Retarget Section */
@@ -408,45 +497,35 @@
       margin-top: 2rem;
       background: var(--surface-color);
     }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .split-view { grid-template-columns: 1fr; }
-      h1 { font-size: 2rem; }
-      .abstract-text { padding: 1.5rem; }
-      .comparison-stack { width: 100%; }
-    }
   </style>
 </head>
 <body>
 
   <!-- Hero Section -->
   <section class="hero container">
-    <h1>
-      <img src="./static/icons/icon_rgba.png" alt="Project Icon2" style="height: 3em; vertical-align: middle; margin-right: 0.5em;">
-      <span style="font-weight: 800; display: inline-block;">Motion 3-to-4</span>
-      
-      <span style="font-weight: 550;font-size: 0.75em; display: inline-block;">3D Motion Reconstruction for 4D Synthesis</span>
+    <h1 style="text-align: center; margin: 0;">
+      <img src="./static/icons/logo.gif" alt="Logo" style="height: 3.6em; display: block; margin: 0 auto 0.01em auto; margin-bottom: 0em;">
+      <span style="font-weight: 600; font-size: 0.76em; display: block; margin-top: 0;">3D Motion Reconstruction for 4D Synthesis</span>
     </h1>
-    <div class="authors-list">
+    <div class="authors-list" style="font-size: 0.98em;">
         <div class="author-block"><a href="https://hyuanChen.github.io/">Hongyuan Chen</a><sup>1</sup></div>
         <div class="author-block"><a href="https://rover-xingyu.github.io/">Xingyu Chen</a><sup>1</sup></div>
         <div class="author-block"><a href="https://youjiazhang.github.io/">Youjia Zhang</a><sup>2</sup></div>
         <div class="author-block"><a href="https://zexiangxu.github.io/">Zexiang Xu</a><sup>3</sup></div>
         <div class="author-block"><a href="https://apchenstu.github.io/">Anpei Chen</a><sup>1</sup></div>
     </div>
-    <div class="affiliation">
+    <div class="affiliation"style="font-size: 0.92em; margin-bottom: 1em;">
         <span><sup>1</sup>Westlake University</span>
         <span style="margin-left: 15px;"><sup>2</sup>HUST</span>
         <span style="margin-left: 15px;"><sup>3</sup>Hillbot</span>
     </div>
 
-    <p style="font-size: 1.25rem; color: #4a5568; margin-bottom: 2rem; max-width: 800px; margin-left: auto; margin-right: auto;">
+    <p style="font-size: 1.15rem; color: #4a5568; margin-bottom: 0.5em; max-width: 800px; margin-left: auto; margin-right: auto;">
       Synthesising high-quality 4D dynamic objects from single monocular video
     </p>
 
     <!-- Links -->
-    <div class="publication-links">
+    <div class="publication-links" style="margin-bottom: 1em;">
       <a href="#" class="link-btn">
         <i class="fas fa-file-pdf"></i> Paper
       </a>
@@ -550,7 +629,7 @@
           <div class="caption" style="text-align: center; font-weight: bold; margin-top: 10px;">Part D Results</div>
         </div>
       </div>
-      <p class="caption" style="text-align: center; margin-top: 10px;">← Swipe to see more results →</p>
+      <p class="caption" style="text-align: center; margin-top: 10px;">← Drag or use arrows to navigate →</p>
     </div>
   </section>
 
@@ -596,41 +675,93 @@
            <div class="caption center">Surfing</div>
         </div>
       </div>
-      <p class="caption" style="text-align: center; margin-top: 10px;">← Swipe to see more results →</p>
+      <p class="caption" style="text-align: center; margin-top: 10px;">← Drag or use arrows to navigate →</p>
     </div>
   </section>
 
   <!-- Real World Video -->
   <section class="section container">
     <h2>Real-World Video Reconstruction</h2>
+    
     <div class="carousel-container">
       <div class="carousel-track">
-        <div class="carousel-item" style="flex: 0 0 40%; max-width: 400px;">
-          <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/internet/horse.mp4" type="video/mp4"></video></div>
-          <div class="caption center">Horse</div>
+        
+        <!-- Column 1 -->
+        <div class="carousel-item" style="flex: 0 0 50%;">
+          <!-- Top Video -->
+          <div style="margin-bottom: 20px;">
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/internet/horse.mp4" type="video/mp4"></video></div>
+            <div class="caption center">Horse</div>
+          </div>
+          <!-- Bottom Video -->
+          <div style="margin-bottom: 20px;">
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/internet/tiger.mp4" type="video/mp4"></video></div>
+            <div class="caption center">Tiger</div>
+          </div>
         </div>
-        <div class="carousel-item" style="flex: 0 0 40%; max-width: 400px;">
-          <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/internet/star1.mp4" type="video/mp4"></video></div>
-          <div class="caption center">Starfish 1</div>
+
+        <!-- Column 2 -->
+        <div class="carousel-item" style="flex: 0 0 50%;">
+          <div style="margin-bottom: 20px;">
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/internet/bird.mp4" type="video/mp4"></video></div>
+            <div class="caption center">Bird</div>
+          </div>
+          <div>
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/internet/star1.mp4" type="video/mp4"></video></div>
+            <div class="caption center">StellaLou</div>
+          </div>
         </div>
-        <div class="carousel-item" style="flex: 0 0 40%; max-width: 400px;">
-          <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/internet/star2.mp4" type="video/mp4"></video></div>
-          <div class="caption center">Starfish 2</div>
+
+        <!-- Column 3 -->
+        <div class="carousel-item" style="flex: 0 0 50%;">
+          <div>
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/internet/Nezuko.mp4" type="video/mp4"></video></div>
+            <div class="caption center">Nezuko</div>
+          </div>
+          <div style="margin-bottom: 20px;">
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/internet/rabbit.mp4" type="video/mp4"></video></div>
+            <div class="caption center">Judy</div>
+          </div>
         </div>
-        <div class="carousel-item" style="flex: 0 0 40%; max-width: 400px;">
-          <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/internet/bear_inter.mp4" type="video/mp4"></video></div>
-          <div class="caption center">Bear</div>
+
+        <!-- Column 4 -->
+        <div class="carousel-item" style="flex: 0 0 50%;">
+          <div style="margin-bottom: 20px;">
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/internet/baby.mp4" type="video/mp4"></video></div>
+            <div class="caption center">Baby</div>
+          </div>
+          <div style="margin-bottom: 20px;">
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/internet/bear_inter.mp4" type="video/mp4"></video></div>
+            <div class="caption center">LinaBell</div>
+          </div>
         </div>
-        <div class="carousel-item" style="flex: 0 0 40%; max-width: 400px;">
-          <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/internet/star3.mp4" type="video/mp4"></video></div>
-          <div class="caption center">Starfish 3</div>
+
+        <!-- Column 5 -->
+        <div class="carousel-item" style="flex: 0 0 50%;">
+          <div>
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/internet/star3.mp4" type="video/mp4"></video></div>
+            <div class="caption center">Olu Mel</div>
+          </div>
+          <div>
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/internet/reze.mp4" type="video/mp4"></video></div>
+            <div class="caption center">Reze</div>
+          </div>
         </div>
-        <div class="carousel-item" style="flex: 0 0 40%; max-width: 400px;">
-          <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/internet/star4.mp4" type="video/mp4"></video></div>
-          <div class="caption center">Starfish 4</div>
+
+        <!-- Column 6 -->
+        <div class="carousel-item" style="flex: 0 0 50%;">
+          <div>
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/internet/star4.mp4" type="video/mp4"></video></div>
+            <div class="caption center">Gelatoni</div>
+          </div>
+          <div>
+            <div class="video-container"><video autoplay controls muted loop playsinline><source src="./static/videos/internet/star2.mp4" type="video/mp4"></video></div>
+            <div class="caption center">StellaLou</div>
+          </div>
         </div>
+
       </div>
-      <p class="caption" style="text-align: center; margin-top: 10px;">← Swipe to see more results →</p>
+      <p class="caption" style="text-align: center; margin-top: 10px;">← Drag or use arrows to navigate →</p>
     </div>
   </section>
 
@@ -694,7 +825,7 @@
         </div>
 
       </div>
-      <p class="caption" style="text-align: center; margin-top: 10px;">← Swipe to see more results →</p>
+      <p class="caption" style="text-align: center; margin-top: 10px;">← Drag or use arrows to navigate →</p>
     </div>
   </section>
 
@@ -737,5 +868,69 @@
     </div>
   </footer>
 
+  <!-- Script for Drag-to-Scroll and Buttons -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const carousels = document.querySelectorAll('.carousel-container');
+
+      carousels.forEach(container => {
+        const track = container.querySelector('.carousel-track');
+        if (!track) return;
+
+        // --- 1. Create Buttons ---
+        const btnLeft = document.createElement('button');
+        btnLeft.className = 'carousel-btn left';
+        btnLeft.innerHTML = '<i class="fas fa-chevron-left"></i>';
+        
+        const btnRight = document.createElement('button');
+        btnRight.className = 'carousel-btn right';
+        btnRight.innerHTML = '<i class="fas fa-chevron-right"></i>';
+
+        container.appendChild(btnLeft);
+        container.appendChild(btnRight);
+
+        // Button Click Logic
+        const scrollAmount = 400; // Adjust scroll distance
+        
+        btnLeft.addEventListener('click', () => {
+          track.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        });
+
+        btnRight.addEventListener('click', () => {
+          track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        });
+
+        // --- 2. Drag to Scroll Logic ---
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        track.addEventListener('mousedown', (e) => {
+          isDown = true;
+          track.classList.add('active');
+          startX = e.pageX - track.offsetLeft;
+          scrollLeft = track.scrollLeft;
+        });
+
+        track.addEventListener('mouseleave', () => {
+          isDown = false;
+          track.classList.remove('active');
+        });
+
+        track.addEventListener('mouseup', () => {
+          isDown = false;
+          track.classList.remove('active');
+        });
+
+        track.addEventListener('mousemove', (e) => {
+          if (!isDown) return;
+          e.preventDefault(); // Prevent text selection
+          const x = e.pageX - track.offsetLeft;
+          const walk = (x - startX) * 2; // Scroll-fastness multiplier
+          track.scrollLeft = scrollLeft - walk;
+        });
+      });
+    });
+  </script>
 </body>
 </html>
