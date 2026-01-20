@@ -526,13 +526,10 @@
 
     <!-- Links -->
     <div class="publication-links" style="margin-bottom: 1em;">
-      <a href="#" class="link-btn">
-        <i class="fas fa-file-pdf"></i> Paper
-      </a>
-      <a href="#" class="link-btn">
+      <a href="https://arxiv.org/abs/2503.24391" class="link-btn">
         <i class="ai ai-arxiv"></i> arXiv
       </a>
-      <a href="#" class="link-btn">
+      <a href="https://github.com/Inception3D/Motion324" class="link-btn">
         <i class="fab fa-github"></i> Code
       </a>
       <a href="#bibtex" class="link-btn">
@@ -541,8 +538,8 @@
     </div>
 
     <!-- Teaser Video -->
-    <div class="video-container hero-video">
-      <video autoplay controls muted loop playsinline poster="">
+    <div class="video-container hero-video" style="width: 90%; margin: 0 auto;">
+      <video autoplay controls muted loop playsinline poster="" style="width: 100%; height: 100%;">
         <source src="./static/videos/teaser.mp4" type="video/mp4">
         Your browser does not support the video tag.
       </video>
@@ -847,9 +844,36 @@
       </div>
     </div>
   </section>
+  <section class="section container">
+
+  <section class="section container">
+    <h2>Related Work</h2>
+    <div class="abstract-text">
+      <p>
+        We compare our method, <b>Motion 3-to-4</b>, with state-of-the-art 4D generation approaches, including:
+      </p>
+      <ul>
+        <li>
+          <a href="https://research.nvidia.com/labs/toronto-ai/l4gm/" target="_blank">
+            L4GM: Large 4D Gaussian Reconstruction Model
+          </a>
+        </li>
+        <li>
+          <a href="https://gvfdiffusion.github.io/" target="_blank">
+            Gaussian Variation Field Diffusion for High-fidelity Video-to-4D Synthesis
+          </a>
+        </li>
+        <li>
+          <a href="https://windvchen.github.io/V2M4/" target="_blank">
+            V2M4: 4D Mesh Animation Reconstruction from a Single Monocular Video
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
 
   <!-- Citation -->
-  <!-- <section class="section container" id="bibtex">
+  <section class="section container" id="bibtex">
     <h2>Citation</h2>
     <pre class="bibtex">
     @article{motion3to4,
@@ -858,7 +882,7 @@
       journal={Conference Name or Journal},
       year={202X}
     }</pre>
-  </section> -->
+  </section>
 
   <footer>
     <div class="container">
